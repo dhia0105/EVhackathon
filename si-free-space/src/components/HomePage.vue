@@ -43,6 +43,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -50,10 +52,24 @@ export default {
       newComment: {} // Object to hold comments for each post
     };
   },
-  created() {
+  async created() {
     // Load posts from local storage
-    const savedPosts = localStorage.getItem('posts');
-    this.posts = savedPosts ? JSON.parse(savedPosts) : [];
+    try {
+          // Send POST request to backend (replace with your actual backend URL)
+          const response = await axios.get("http://localhost:8000/posts", {
+            question: this.question,
+            sector_initiative: this.sectorInitiative
+
+          });
+          console.log(response);
+          // Handle the response and display the result
+          this.posts = response.data.posts;
+          this.error = null; // Clear any previous errors
+        } catch (err) {
+          // Handle any errors that occur during the request
+          this.result = null; // Clear previous results
+          this.error = 'Something went wrong. Please try again later.';
+        }
   },
   methods: {
     addComment(index) {

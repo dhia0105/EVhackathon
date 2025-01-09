@@ -1,51 +1,52 @@
 <template>
     <div class="create-post-page">
       <h1>Create a New Post</h1>
-      <form @submit.prevent="submitPost">
+      <form @submit.prevent="createPost">
         <input 
-          v-model="newPost.title" 
+          v-model="title" 
           placeholder="Title" 
           required 
         />
         <textarea 
-          v-model="newPost.content" 
+          v-model="content" 
           placeholder="Write your post here..." 
           required
         ></textarea>
-        <button type="submit">Submit</button>
+        <button type="submit" >Submit</button>
       </form>
       <router-link to="/" class="back-home-link">← Back to Home</router-link>
     </div>
   </template>
   
   <script>
+  import axios from 'axios';
+
   export default {
     data() {
       return {
-        newPost: {
           title: '',
           content: ''
-        }
+        
       };
     },
     methods: {
-      submitPost() {
-        if (!this.newPost.title || !this.newPost.content) return;
-  
-        // Save to local storage or mock backend (temporary example)
-        const posts = JSON.parse(localStorage.getItem('posts')) || [];
-        posts.push({
-          title: this.newPost.title,
-          content: this.newPost.content
-        });
-        localStorage.setItem('posts', JSON.stringify(posts));
-  
-        // Clear the form
-        this.newPost.title = '';
-        this.newPost.content = '';
-  
-        // Redirect to Home Page
-        this.$router.push('/');
+      async createPost() {
+        try {
+          // Send POST request to backend (replace with your actual backend URL)
+          const response = await axios.post("http://localhost:8000/post", {
+            title: this.title,
+            content: this.content
+          });
+          console.log(response);
+          // Handle the response and display the result
+          this.error = null; // Clear any previous errors
+        } catch (err) {
+          // Handle any errors that occur during the request
+          this.result = null; // Clear previous results
+          this.error = 'Something went wrong. Please try again later.';
+        }
+         // Redirect to Home Page
+         this.$router.push('/');
       }
     }
   };
