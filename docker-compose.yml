@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+    backend:
+        image: ./backend
+        ports:
+            - "8000:8000"
+
+    frontend:  ./frontend
+        image: your-frontend-image
+        ports:
+            - "5137:5137"
