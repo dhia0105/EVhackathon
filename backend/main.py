@@ -20,9 +20,9 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-with open("context.txt", "r") as file:
-    context = file.read()
-
+#with open("context.txt", "r") as file:
+#    context = file.read()
+#context = ""
 # Pydantic model for input data
 class TextInput(BaseModel):
     question: str
@@ -44,6 +44,13 @@ If the question is not answerable from the given context, respond with "No recom
 """
 
 def prepare_message_for_query(question, sector_initiative):
+    context = "these are publications from companies in which they share best practices about many topics"
+    with open('posts.json', 'r') as file:
+        posts = json.load(file)
+    for post in posts["posts"]:
+        context += "publication title: " + post["title"]
+        context += "publication content: " + post["content"]
+    print(context)
     messages=[
         {"role": "system", "content": system_message},  # Optionally, provide a system message
         {"role": "user", "content": context},  # Provide the context
@@ -53,7 +60,7 @@ def prepare_message_for_query(question, sector_initiative):
 
 
 def get_recommendations(question, client, sector_initiative):
-    messages = prepare_message_for_query(question, context)
+    messages = prepare_message_for_query(question, sector_initiative)
     response = client.chat.completions.create(
         messages=messages,
         stream=False,
