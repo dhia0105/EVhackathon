@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
 from fastapi.middleware.cors import CORSMiddleware
-
+import json
 # FastAPI app setup
 app = FastAPI()
 origins = [
@@ -22,10 +22,15 @@ app.add_middleware(
 
 with open("context.txt", "r") as file:
     context = file.read()
+
 # Pydantic model for input data
 class TextInput(BaseModel):
     question: str
     sector_initiative: str
+
+class Post(BaseModel):
+    title: str
+    content: str
 # Azure OpenAI setup (use environment variable for security)
 openai_endpoint = "https://openai-track05-hackathon.openai.azure.com"     # Add the endpoint here
 model_deployment =  "gpt-4o-mini-deployment" # Add the model deployment here
@@ -71,6 +76,19 @@ def create_and_return_recommendations(question, sector_initiative):
     recommendation = get_recommendations(question, open_ai_client, sector_initiative)
     return recommendation
 
+def create_post(title, content):
+    try:
+        # get posts
+        with open('posts.json', 'r') as file:
+            posts = json.load(file)
+        # Append new post to the list
+        posts["posts"].append({"title": title, "content": content})
+        # Write posts back to the file
+        with open('posts.json', 'w') as file:
+            json.dump({"posts": posts["posts"]}, file, indent=4)  # 'indent' makes the file readable
+    except Exception as e:
+        print(e)
+        return None
 # FastAPI endpoint to query the database and get response from OpenAI
 @app.post("/ask")
 async def ask_openai(input_data: TextInput):
@@ -79,3 +97,23 @@ async def ask_openai(input_data: TextInput):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error communicating with OpenAI: {str(e)}")
     return {"recommendations": recommendation}
+
+# FastAPI endpoint to query the database and get response from OpenAI
+@app.post("/post")
+async def add_a_post(post: Post):
+    try:
+        create_post(post.title, post.content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error while creating the post: {str(e)}")
+    return {"status": "success"}
+
+# FastAPI endpoint to query the database and get response from OpenAI
+@app.get("/posts")
+async def get_posts():
+    published_posts = []
+    try:
+        with open('posts.json', 'r') as file:
+            published_posts = json.load(file)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting the posts: {str(e)}")
+    return {"posts": published_posts["posts"]}
