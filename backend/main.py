@@ -39,17 +39,18 @@ openai_api_version = "2024-08-01-preview"   # From this version, structured resp
 
 system_message = """
 You are a helpful assistant that only answers questions based on the provided context.
-Do not provide any information that is not contained in the context.
 If the question is not answerable from the given context, respond with "No recommendations found.".
 """
 
 def prepare_message_for_query(question, sector_initiative):
-    context = "these are publications from companies in which they share best practices about many topics"
+    context = "these are publications from companies in which they share best practices  \n"
     with open('posts.json', 'r') as file:
         posts = json.load(file)
+    i = 1
     for post in posts["posts"]:
-        context += "publication title: " + post["title"]
-        context += "publication content: " + post["content"]
+        context += "publication " + str(i) + ": \n" + "title: " + post["title"] + ". \n"
+        context += "content: " + post["content"]
+        i+=1
     print(context)
     messages=[
         {"role": "system", "content": system_message},  # Optionally, provide a system message
