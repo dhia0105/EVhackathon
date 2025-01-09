@@ -20,10 +20,12 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+with open("context.txt", "r") as file:
+    context = file.read()
 # Pydantic model for input data
 class TextInput(BaseModel):
     question: str
-    context: str
+    sector_initiative: str
 # Azure OpenAI setup (use environment variable for security)
 openai_endpoint = "https://openai-track05-hackathon.openai.azure.com"     # Add the endpoint here
 model_deployment =  "gpt-4o-mini-deployment" # Add the model deployment here
@@ -33,10 +35,10 @@ openai_api_version = "2024-08-01-preview"   # From this version, structured resp
 system_message = """
 You are a helpful assistant that only answers questions based on the provided context.
 Do not provide any information that is not contained in the context.
-If the question is not answerable from the given context, respond with "I don't know."
+If the question is not answerable from the given context, respond with "No recommendations found.".
 """
 
-def prepare_message_for_query(question, context):
+def prepare_message_for_query(question, sector_initiative):
     messages=[
         {"role": "system", "content": system_message},  # Optionally, provide a system message
         {"role": "user", "content": context},  # Provide the context
@@ -45,7 +47,7 @@ def prepare_message_for_query(question, context):
     return messages
 
 
-def get_recommendations(question, client, context):
+def get_recommendations(question, client, sector_initiative):
     messages = prepare_message_for_query(question, context)
     response = client.chat.completions.create(
         messages=messages,
@@ -59,21 +61,21 @@ def get_recommendations(question, client, context):
         return None
 
 
-def create_and_return_recommendations(question, context):
+def create_and_return_recommendations(question, sector_initiative):
     open_ai_client = AzureOpenAI(
         azure_endpoint=openai_endpoint,
         api_key=openai_key,
         azure_deployment= model_deployment,
         api_version=openai_api_version,
     )
-    recommendation = get_recommendations(question, open_ai_client, context)
+    recommendation = get_recommendations(question, open_ai_client, sector_initiative)
     return recommendation
 
 # FastAPI endpoint to query the database and get response from OpenAI
 @app.post("/ask")
 async def ask_openai(input_data: TextInput):
     try:
-        recommendation = create_and_return_recommendations(input_data.question, input_data.context)
+        recommendation = create_and_return_recommendations(input_data.question, input_data.sector_initiative)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error communicating with OpenAI: {str(e)}")
     return {"recommendations": recommendation}
