@@ -1,12 +1,10 @@
 <template>
     <div class="submit-info-page">
-      <h1>Submit Information</h1>
+      <h1>Together for Sustainability recommendations page</h1>
+      <img :src="require('@/assets/tfs.png')" alt="Local Example" />
       <form @submit.prevent="submitInfo">
-        <label for="question">Enter a question :</label>
+        <label for="question">Request a recommendation :</label>
         <input type="text" v-model="question" id="info" placeholder="Type something..." required />
-        <br>
-        <label for="context">some context is needed :</label>
-        <input type="text" v-model="context" id="info" placeholder="Type something..." required />
         <button type="submit">Submit</button>
       </form>
   
@@ -29,7 +27,7 @@
     data() {
       return {
         question: '', // The user input
-        context: '',
+        sectorInitiative: 'tfs',
         result: null, // The result from the backend
         error: null // Error message if the request fails
       };
@@ -40,7 +38,7 @@
           // Send POST request to backend (replace with your actual backend URL)
           const response = await axios.post("http://localhost:8000/ask", {
             question: this.question,
-            context: this.context
+            sectorInitiative: this.sectorInitiative
 
           });
           console.log(response);
@@ -98,7 +96,7 @@
   .result {
   background-color: #e7f7e7;
   border: 1px solid 
-          #42b983;
+          #e7f7e7;
   }
   
   .error {
