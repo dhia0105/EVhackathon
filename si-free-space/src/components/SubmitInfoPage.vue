@@ -1,7 +1,7 @@
 <template>
     <div class="submit-info-page">
-      <h1>Together for Sustainability recommendations page</h1>
-      <img :src="require('@/assets/tfs.png')" alt="Local Example" />
+      <img :src="imageUrl" alt="Local Example" />
+      <br><br><br>
       <form @submit.prevent="submitInfo">
         <label for="question">Request a recommendation :</label>
         <input type="text" v-model="question" id="info" placeholder="Type something..." required />
@@ -9,8 +9,8 @@
       </form>
   
       <div v-if="result" class="result">
-        <h3>Result:</h3>
-        <pre>{{ result }}</pre>
+        <h3>Recommendations:</h3>
+        <div class="pretty-text-container">{{ result }}</div>
       </div>
   
       <div v-if="error" class="error">
@@ -22,6 +22,8 @@
   
   <script>
   import axios from 'axios';
+  import imageUrl from '@/assets/rhip.png';
+
   
   export default {
     data() {
@@ -29,7 +31,8 @@
         question: '', // The user input
         sectorInitiative: 'tfs',
         result: null, // The result from the backend
-        error: null // Error message if the request fails
+        error: null, // Error message if the request fails
+        imageUrl,
       };
     },
     methods: {
@@ -38,7 +41,7 @@
           // Send POST request to backend (replace with your actual backend URL)
           const response = await axios.post("http://localhost:8000/ask", {
             question: this.question,
-            sectorInitiative: this.sectorInitiative
+            sector_initiative: this.sectorInitiative
 
           });
           console.log(response);
@@ -94,9 +97,9 @@
   }
   
   .result {
-  background-color: #e7f7e7;
+  background-color: #f8f8f8;
   border: 1px solid 
-          #e7f7e7;
+  #f8f8f8;
   }
   
   .error {
@@ -104,5 +107,14 @@
     border: 1px solid #f5c6cb;
     color: #721c24;
   }
+  .pretty-text-container {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f9f9f9, #e3e3e3);
+  border-radius: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 2rem auto;
+}
   </style>
   
